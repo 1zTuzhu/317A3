@@ -7,54 +7,44 @@ require_once __DIR__ . '/vendor/autoload.php';
 use Phpml\Regression\LeastSquares;
 use Phpml\ModelManager;
 
-$samples = [];
-$temp_max = [];
-$temp_min = [];
-$hum_max = [];
-$hum_min = [];
-
 $t_ = time();
-
 $data = json_decode(file_get_contents("all_station.json"));
+$modelManager = new ModelManager();
+$sites = [];
 
 foreach ($data as $row) {
     $site = intval($row->station);
-    $date = strtotime($row->date);
-    
-    $year = (int)date("Y", $date);
+    $date = strtotime($row->date);    
     $month = (int)date("n",$date);
-    $day = (int)date("j", $date);
+    $day = (int)date("j", $date);    
+    $sample = [$month, $day];
     
-    $samples[] = [$site, $year, $month, $day];
-    
-    $max_temp[] =floatval($row -> max_Temperature);
-    $min_temp[] =floatval($row -> min_Temperature);
-    $max_humidity[] = floatval($row -> max_Humidity);
-    $min_humidity[] = floatval($row -> min_Humidity);
+    $sites[$site]['samples'][] = $sample;
+    $sites[$site]['max_temp'][] = floatval($row->max_Temperature);
+    $sites[$site]['min_temp'][] = floatval($row->min_Temperature);
+    $sites[$site]['max_humidity'][] = floatval($row->max_Humidity);
+    $sites[$site]['min_humidity'][] = floatval($row->min_Humidity);
 }
 
-$model_max_temp = new LeastSquares(); $model_max_temp->train($samples, $max_temp);
-$model_min_temp = new LeastSquares(); $model_min_temp->train($samples, $min_temp);
-$model_max_humidity = new LeastSquares(); $model_max_humidity->train($samples, $max_humidity);
-$model_min_humidity = new LeastSquares(); $model_min_humidity->train($samples, $min_humidity);
+foreach($sites as $site => $data) {
 
+    $samples = $data['samples'];
 
-$modelManager = new ModelManager();
-$modelManager->saveToFile($model_max_temp, 'model_max_temp.dat');
-$modelManager->saveToFile($model_min_temp, 'model_min_temp.dat');
-$modelManager->saveToFile($model_max_humidity, 'model_max_humidity.dat');
-$modelManager->saveToFile($model_min_humidity, 'model_min_humidity.dat');
+    $max_temp = new LeastSquares();
+    $min_temp = new LeastSquares();
+    $max_humidity = new LeastSquares();
+    $min_humidity = new LeastSquares();
 
-echo "Trainning finished in " . (time() - $t_) . "s\n";
-$test_sample = [94029, 2022, 6, 15];
-$predicted_max_temp = $model_max_temp->predict($test_sample);
-$predicted_min_temp = $model_min_temp->predict($test_sample);
-$predicted_max_humidity = $model_max_humidity->predict($test_sample);
-$predicted_min_humidity = $model_min_humidity->predict($test_sample);
+    $max_temp->train($samples, $data['max_temp']);
+    $min_temp->train($samples, $data['min_temp']);
+    $max_humidity->train($samples, $data['max_humidity']);
+    $min_humidity->train($samples, $data['min_humidity']);
 
-echo "pridiction result: station 94029 on 2022-06-15's max temp is $predicted_max_temp °C\n";
-echo "pridiction result: station 94029 on 2022-06-15's min temp is $predicted_min_temp °C\n";
-echo "pridiction result: station 94029 on 2022-06-15's max humidity is $predicted_max_humidity %\n";
-echo "pridiction result: station 94029 on 2022-06-15's min humidity is $predicted_min_humidity %\n";
+    $modelManager->saveToFile($max_temp, __DIR__ . "/{$site}_maxTempModel.dat");
+    $modelManager->saveToFile($min_temp, __DIR__ . "/{$site}_minTempModel.dat");
+    $modelManager->saveToFile($max_humidity, __DIR__ . "/{$site}_maxHumidityModel.dat");
+    $modelManager->saveToFile($min_humidity, __DIR__ . "/{$site}_minHumidityModel.dat");
+}
+echo "Training completed in " . (time() - $t_) . " seconds.\n";
 
 ?>

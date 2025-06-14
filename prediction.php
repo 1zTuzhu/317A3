@@ -13,13 +13,13 @@ $station = intval($record->site);
 $year = intval($record->year);
 $month = intval($record->month);
 $day = intval($record->day);
-$sample = [$station, $year, $month, $day];
+$sample = [$month, $day];
 
 $modelManager = new ModelManager();
-$model_max_temp = $modelManager->restoreFromFile(__DIR__ . "/model_max_temp.dat");
-$model_min_temp = $modelManager->restoreFromFile(__DIR__ . "/model_min_temp.dat");
-$model_max_humidity = $modelManager->restoreFromFile(__DIR__ . "/model_max_humidity.dat");
-$model_min_humidity = $modelManager->restoreFromFile(__DIR__ . "/model_min_humidity.dat");
+$model_max_temp = $modelManager->restoreFromFile(__DIR__ . "/{$station}_maxTempModel.dat");
+$model_min_temp = $modelManager->restoreFromFile(__DIR__ . "/{$station}_minTempModel.dat");
+$model_max_humidity = $modelManager->restoreFromFile(__DIR__ . "/{$station}_maxHumidityModel.dat");
+$model_min_humidity = $modelManager->restoreFromFile(__DIR__ . "/{$station}_minHumidityModel.dat");
 
 $max_temp = round($model_max_temp->predict($sample), 1);
 $min_temp = round($model_min_temp->predict($sample), 1);
@@ -38,7 +38,7 @@ $site_name = $siteNames[$station] ?? "Unknown Station";
 $entry = new stdClass();
 $entry->station = $station;
 $entry->site_name = $site_name;
-$entry->date = sprintf("%04d-%02d-%02d", $year, $month, $day);
+$entry->date = sprintf("2022-%02d-%02d", $month, $day);
 $entry->max_temp = $max_temp;
 $entry->min_temp = $min_temp;
 $entry->max_humidity = $max_humidity;

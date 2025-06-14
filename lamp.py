@@ -16,6 +16,11 @@ speed = 0.05
 selection_list = ["day","month","site"]
 site_list = [91107,91237,91292,94029,94212]
 
+predict_temp = (0,1)
+predict_humidity = (0,1)
+current_type = "temp"
+predicted = False
+
 def selections():
     s.show_message("Set " + selection_list[selection],speed)
     
@@ -28,8 +33,13 @@ def scroll_selections():
         s.show_message("Site: " + str(site_id), scroll_speed=speed)
 
 def prediction():
+    global predict_temp, predict_humidity,predicted
     r = requests.get("http://iotserver.com/prediction.php")
     data = r.json()
+    
+    predict_temp = (float(data["min_temp"]), float(data["max_temp"]))
+    predict_humidity = (float(data["min_humidity"]), float(data["max_humidity"]))
+    predicted = True
 
     print("Prediction:")
     print("Site:", data["site_name"])
@@ -98,8 +108,34 @@ while True:
                         index = site_list.index(site_id)
                         site_id = site_list[(index - 1) % 5]
                     scroll_selections()
+            elif mode == "normal":
+                if event.direction == "left":
+                    current_type = "humidity"
+                    s.show_message("Humidity",scroll_speed=speed)
+                elif event.direction == "right":
+                    current_type = "temp"
+                    s.show_message("Temp",scroll_speed = speed)
+                else:
+                    current_type = "temp"
+                 
+    if mode == "normal" and predicted:
+        temperature = s.get_temperature()
+        humidity = s.get_humidity()
+
+        if current_type == "temp":
+            if temperature < predict_temp[0] or temperature > predict_temp[1]:
+                s.clear(255, 0, 0)
+            else:
+                s.clear(0, 255, 0)
+        elif current_type == "humidity":
+            if humidity < predict_humidity[0] or humidity > predict_humidity[1]:
+                s.clear(255, 255, 0)
+            else:
+                s.clear(0, 0, 255)
+                
                     
     
 
         
+
 
