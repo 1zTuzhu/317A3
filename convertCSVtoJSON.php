@@ -1,7 +1,7 @@
 <?php
 
-$inputCsv = __DIR__ . "/91107_clean.csv";
-$outputJson = __DIR__ . "/91107_clean.json";
+$inputCsv = __DIR__ . "/all_station_data_clean.csv";
+$outputJson = __DIR__ . "/all_station.json";
 
 $data = [];
 $headers = [];
