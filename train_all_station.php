@@ -4,8 +4,7 @@ ini_set('display_errors', '1');
 header('Content-type: text/plain');
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Phpml\Regression\SVR;
-use Phpml\SupportVectorMachine\Kernel;
+use Phpml\Regression\LeastSquares;
 use Phpml\ModelManager;
 
 $samples = [];
@@ -34,10 +33,10 @@ foreach ($data as $row) {
     $min_humidity[] = floatval($row -> min_Humidity);
 }
 
-$model_max_temp = new SVR(Kernel::RBF, 1.0, 0.2); $model_max_temp->train($samples, $max_temp);
-$model_min_temp = new SVR(Kernel::RBF, 1.0, 0.2); $model_min_temp->train($samples, $min_temp);
-$model_max_humidity = new SVR(Kernel::RBF, 1.0, 0.2); $model_max_humidity->train($samples, $max_humidity);
-$model_min_humidity = new SVR(Kernel::RBF, 1.0, 0.2); $model_min_humidity->train($samples, $min_humidity);
+$model_max_temp = new LeastSquares(); $model_max_temp->train($samples, $max_temp);
+$model_min_temp = new LeastSquares(); $model_min_temp->train($samples, $min_temp);
+$model_max_humidity = new LeastSquares(); $model_max_humidity->train($samples, $max_humidity);
+$model_min_humidity = new LeastSquares(); $model_min_humidity->train($samples, $min_humidity);
 
 
 $modelManager = new ModelManager();
@@ -59,8 +58,3 @@ echo "pridiction result: station 94029 on 2022-06-15's max humidity is $predicte
 echo "pridiction result: station 94029 on 2022-06-15's min humidity is $predicted_min_humidity %\n";
 
 ?>
-
-
-
-
-

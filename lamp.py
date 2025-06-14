@@ -26,6 +26,16 @@ def scroll_selections():
         s.show_message("Month: " + str(month), scroll_speed=speed)
     elif selection_list[selection] == "site":
         s.show_message("Site: " + str(site_id), scroll_speed=speed)
+
+def prediction():
+    r = requests.get("http://iotserver.com/prediction.php")
+    data = r.json()
+
+    print("Prediction:")
+    print("Site:", data["site_name"])
+    print("Date:", data["date"])
+    print("Temp:","min:", data["min_temp"], " max: ", data["max_temp"])
+    print("Humidity:","min:", data["min_humidity"], " max:", data["max_humidity"])
         
 def send_to_server():
     payload = {
@@ -38,6 +48,8 @@ def send_to_server():
     print("Update date successful")
     if "Write Successful" not in r.text:
         print("data upload failed")
+    prediction()
+        
 s.show_message("Mode: Normal",scroll_speed = speed)
 while True:
     for event in s.stick.get_events():
@@ -90,3 +102,4 @@ while True:
     
 
         
+
