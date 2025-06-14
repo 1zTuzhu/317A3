@@ -18,7 +18,7 @@ foreach ($data as $row) {
     $month = (int)date("n",$date);
     $day = (int)date("j", $date);    
     $sample = [$month, $day];
-    
+    //adding data to their respective sites
     $sites[$site]['samples'][] = $sample;
     $sites[$site]['max_temp'][] = floatval($row->max_Temperature);
     $sites[$site]['min_temp'][] = floatval($row->min_Temperature);

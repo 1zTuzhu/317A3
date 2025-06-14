@@ -10,6 +10,7 @@ if (($handle = fopen($inputCsv, "r")) !== false) {
     while (($row = fgetcsv($handle)) !== false) {
         if (empty($headers)) {
             $headers = array_map(function($h) {
+                // Remove BOM 
                 return preg_replace('/^\xEF\xBB\xBF/', '', $h);
             }, $row);
         } else {

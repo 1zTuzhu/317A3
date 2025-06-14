@@ -21,9 +21,11 @@ predict_humidity = (0,1)
 current_type = "temp"
 predicted = False
 
+#show current selections
 def selections():
     s.show_message("Set " + selection_list[selection],speed)
     
+#scroll through current selections
 def scroll_selections():
     if selection_list[selection] == "day":
         s.show_message("Day: " + str(day), scroll_speed=speed)
@@ -32,11 +34,11 @@ def scroll_selections():
     elif selection_list[selection] == "site":
         s.show_message("Site: " + str(site_id), scroll_speed=speed)
 
+#pridiction and setup predict status
 def prediction():
     global predict_temp, predict_humidity,predicted
     r = requests.get("http://iotserver.com/prediction.php")
-    data = r.json()
-    
+    data = r.json()    
     predict_temp = (float(data["min_temp"]), float(data["max_temp"]))
     predict_humidity = (float(data["min_humidity"]), float(data["max_humidity"]))
     predicted = True
@@ -47,6 +49,7 @@ def prediction():
     print("Temp:","min:", data["min_temp"], " max: ", data["max_temp"])
     print("Humidity:","min:", data["min_humidity"], " max:", data["max_humidity"])
         
+#send data to server
 def send_to_server():
     payload = {
         "day": str(day),
@@ -62,9 +65,9 @@ def send_to_server():
         
 s.show_message("Mode: Normal",scroll_speed = speed)
 while True:
+    #button press events
     for event in s.stick.get_events():
-        if event.action == "pressed":
-            #middle button pressed, check mode status
+        if event.action == "pressed":            
             if event.direction == "middle":                
                 if mode == "normal":
                     mode = "setup"
@@ -83,7 +86,6 @@ while True:
                 elif event.direction == "right":
                     selection = (selection + 1) % 3
                     selections()
-                #change value
                 elif event.direction == "up":
                     if selection_list[selection] == "day":
                         day = (day % 31) + 1
@@ -108,6 +110,7 @@ while True:
                         index = site_list.index(site_id)
                         site_id = site_list[(index - 1) % 5]
                     scroll_selections()
+            #normal mode
             elif mode == "normal":
                 if event.direction == "left":
                     current_type = "humidity"
@@ -117,7 +120,7 @@ while True:
                     s.show_message("Temp",scroll_speed = speed)
                 else:
                     current_type = "temp"
-                 
+    #lights up
     if mode == "normal" and predicted:
         temperature = s.get_temperature()
         humidity = s.get_humidity()
